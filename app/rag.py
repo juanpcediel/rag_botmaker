@@ -1,5 +1,5 @@
 from collections import defaultdict
-from batch.embeddings_local import embed_texts
+from batch_indexer.embeddings_local import embed_texts
 from app.config import settings
 from app.prompt import PROMPT_TEMPLATE
 

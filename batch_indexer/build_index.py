@@ -7,8 +7,8 @@ import faiss
 from pathlib import Path
 from dotenv import load_dotenv
 
-from batch.chunking import build_chunks
-from batch.embeddings_local import embed_texts
+from batch_indexer.chunking import build_chunks
+from batch_indexer.embeddings_local import embed_texts
 
 load_dotenv()
 
