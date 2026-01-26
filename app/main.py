@@ -82,8 +82,11 @@ def build_gradio():
 # app = gr.mount_gradio_app(app, demo, path="/gradio")
 
 # Montado explicito y aislado
-app = gr.mount_gradio_app(
-    app,
-    build_gradio(),
-    path='/qa'
-)
+ENABLE_QA = os.getenv('ENABLE_QA', 'false').lower() == 'true'
+if ENABLE_QA:
+        
+    app = gr.mount_gradio_app(
+        app,
+        build_gradio(),
+        path='/qa'
+    )
