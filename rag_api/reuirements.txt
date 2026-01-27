@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+gradio
+boto3
+python-dotenv
+faiss-cpu
+requests

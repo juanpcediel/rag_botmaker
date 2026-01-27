@@ -94,7 +94,9 @@ def main():
                 "dataset": DATA_FILENAME,
                 "s3_bucket": S3_BUCKET,
                 "s3_prefix": S3_PREFIX,
-                "model": os.getenv("EMBED_MODEL_NAME")
+                "model": os.getenv("EMBED_MODEL_NAME"),
+                "metric": "inner_product",
+                "index_type": "HNSWFlat"
             }, 
             f, 
             indent=2

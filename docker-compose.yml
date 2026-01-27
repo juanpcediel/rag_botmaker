@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+
+  rag_api:
+    build:
+      context: ./microservicio_chatbot/rag_api
+      dockerfile: Dockerfile
+    container_name: rag_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # FAISS + metadata compartida con el host
+      - ./artifacts/faiss:/app/artifacts/faiss
+    depends_on:
+      - batch_indexer
+    restart: unless-stopped
+
+  batch_indexer:
+    build:
+      context: ./microservicio_chatbot/batch_indexer
+      dockerfile: Dockerfile
+    container_name: batch_indexer
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    restart: unless-stopped
