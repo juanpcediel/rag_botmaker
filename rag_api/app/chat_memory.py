@@ -1,6 +1,6 @@
 import faiss
 import time
-from batch_indexer.embeddings_local import embed_texts
+from app.embeddings_client import embed_texts
 
 
 class ChatMemory:

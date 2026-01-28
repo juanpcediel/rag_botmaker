@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
 
   rag_api:
     build:
-      context: ./microservicio_chatbot/rag_api
+      context: ./rag_api
       dockerfile: Dockerfile
     container_name: rag_api
     ports:
@@ -20,7 +18,7 @@ services:
 
   batch_indexer:
     build:
-      context: ./microservicio_chatbot/batch_indexer
+      context: ./batch_indexer
       dockerfile: Dockerfile
     container_name: batch_indexer
     ports:

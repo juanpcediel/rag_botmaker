@@ -1,24 +1,22 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-# Evita .pyc y fuerza logs en tiempo real (clave en contenedores)
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
-
-# Dependencias del sistema (FAISS / numpy / torch-friendly)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalamos dependencias primero para aprovechar cache
+WORKDIR /app
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos solo el código del servicio
-COPY batch ./batch
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8001
+COPY . .
 
-# Exec form → señales correctas (SIGTERM, SIGINT)
-CMD ["uvicorn", "batch.api:app", "--host", "0.0.0.0", "--port", "8001"]
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
