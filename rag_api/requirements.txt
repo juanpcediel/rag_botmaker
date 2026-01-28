@@ -6,3 +6,6 @@ boto3
 python-dotenv
 faiss-cpu
 requests
+numpy
+pandas
+
