@@ -1,43 +1,10 @@
 from collections import defaultdict
+
 from app.embeddings_client import embed_texts
+from app.retrieval import retrieve_products
+
 from app.config import settings
 from app.prompt import PROMPT_TEMPLATE
-
-
-def retrieve_product_context(store, query, top_k_products=5, overfetch=30):
-    qv = embed_texts([query])
-    _, idxs = store.index.search(qv, overfetch)
-    grouped = defaultdict(list)
-    order = []
-
-    for i in idxs[0]:
-        if i < 0:
-            continue
-        item = store.metadata[i]
-        pid = item["product_id"]
-        grouped[pid].append(item)
-        if pid not in order:
-            order.append(pid)
-    context_blocks = []
-    products = []
-
-    for pid in order[:top_k_products]:
-        items = grouped[pid]
-        merged_text = "\n\n".join(x["text"] for x in items)
-
-        best = items[0]
-        products.append({
-            "title": best["title"],
-            "image": best["image"],
-            "link": best["link"]
-        })
-
-        context_blocks.append(merged_text)
-
-    context = "\n\n---\n\n".join(context_blocks)
-    return context, products
-    
-
 
 def format_chat_history(turns):
     return "\n".join(
@@ -46,7 +13,7 @@ def format_chat_history(turns):
 
 
 def generate_answer(store, question, memory, llm_call):
-    context, products = retrieve_product_context(store, question)
+    context, products = retrieve_products(store, question)
 
     recent = memory.last_n(6)
     relevant = memory.retrieve_relevant(question, k=3)
