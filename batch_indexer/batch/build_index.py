@@ -49,6 +49,9 @@ def main():
     print(f'Reading dataset from {DATA_PATH}')
     df =  pd.read_parquet(DATA_PATH)
 
+    # Data processing HERE... 
+    
+
     # Chunking
     print("Chunking ...")
     chunks = []
