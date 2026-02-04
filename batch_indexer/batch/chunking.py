@@ -1,49 +1,69 @@
-def clean(x: str) -> str:
-    return (x or "").strip()
+def clean(x):
+    return (str(x) if x is not None else "").strip()
 
 
 def build_chunks(row: dict) -> list[dict]:
-    product_id = row.get("Link") or row.get("Nombre_producto")
+
+    sku = clean(row.get("sku"))
+    product_id = sku            
 
     title = clean(row.get("Nombre_producto"))
-    category = clean(row.get("Categoria"))
-    brand = clean(row.get("Marca"))
-    keywords = clean(row.get("Keywords"))
     description = clean(row.get("Descripcion_producto"))
+    keywords = clean(row.get("Keywords"))
     meta = clean(row.get("MetaTagDescription"))
-    price = clean(row.get("Precio"))
+    category = clean(row.get("Nombre_Categoria"))
+    brand = clean(row.get("Marca"))
     size = clean(row.get("Talla"))
+    color = clean(row.get("Color"))
 
-    image = clean(row.get("Imagen"))
+    image = clean(row.get("Imagen_url"))
     link = clean(row.get("Link"))
+
+    price = row.get("Precio")
+    stock = row.get("Inventario")
 
     chunks = []
 
-    # Chunk resumen (búsquedas generales)
+    # Chunk semántico natural
+    
+    semantic_text = " ".join(filter(None, [
+        title,
+        f"marca {brand}" if brand else "",
+        f"categoria {category}" if category else "",
+        f"color {color}" if color else "",
+        f"talla {size}" if size else "",
+        keywords,
+        description,
+        meta
+    ]))
+
     chunks.append({
         "product_id": product_id,
+        "sku": sku,               
         "title": title,
-        "text": f"""Producto: {title}
-                Categoría: {category}
-                Marca: {brand}
-                Keywords: {keywords}
-                Precio: {price}
-                Talla: {size}""".strip(),
+        "text": semantic_text,
         "image": image,
-        "link": link
+        "link": link,
+        "price": price,
+        "stock": stock
     })
 
-    # Chunk descripción (búsquedas semánticas)
-    long_desc = "\n".join([x for x in [description, meta] if x])
-    if long_desc:
-        chunks.append({
-            "product_id": product_id,
-            "title": title,
-            "text": f"""Producto: {title}
-                Descripción:
-                {long_desc}""".strip(),
-            "image": image,
-            "link": link
-        })
+    
+    # Chunk corto keywords
+    
+    short_text = " ".join(filter(None, [
+        title, brand, category, color, size, keywords
+    ]))
+
+    chunks.append({
+        "product_id": product_id,
+        "sku": sku,
+        "title": title,
+        "text": short_text,
+        "image": image,
+        "link": link,
+        "price": price,
+        "stock": stock
+    })
 
     return chunks
