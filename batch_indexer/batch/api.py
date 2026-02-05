@@ -54,8 +54,12 @@ async def run_reindex():
 # -------------------------
 @app.on_event("startup")
 async def startup_tasks():
-    asyncio.create_task(run_reindex())      # build first time
-    asyncio.create_task(periodic_reindex()) # scheduler
+    # primera construcción BLOQUEANTE
+    await run_reindex()
+
+    # luego scheduler en background
+    asyncio.create_task(periodic_reindex())
+
 
 
 # -------------------------

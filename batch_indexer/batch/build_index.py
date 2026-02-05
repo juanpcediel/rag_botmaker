@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from batch.chunking import build_chunks
 from batch.embeddings_local import embed_texts
+from batch.data_processing import parquet_data_processing
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ def download_from_s3():
     print("=== Download complete ===")
 
 
-def main():
+def build_index():
     print('=== Batch indexer started ===')
 
     # Check dataset presence
@@ -47,10 +48,11 @@ def main():
         raise FileNotFoundError(f'Dataset cannot be get even after S3 download attempt: {DATA_PATH}')
     
     print(f'Reading dataset from {DATA_PATH}')
-    df =  pd.read_parquet(DATA_PATH)
+    df_raw =  pd.read_parquet(DATA_PATH)
 
-    # Data processing HERE... 
+    # Data processing HERE... soon
     
+    df = parquet_data_processing(df_raw)
 
     # Chunking
     print("Chunking ...")
@@ -109,4 +111,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    build_index()

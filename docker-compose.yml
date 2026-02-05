@@ -4,31 +4,53 @@ services:
     build:
       context: ./batch_indexer
       dockerfile: Dockerfile
+
     container_name: batch_indexer
+
     ports:
       - "8001:8001"
+
     env_file:
       - .env
+
     volumes:
-      - ./artifacts/faiss:/artifacts/faiss
+      - ./artifacts/faiss:/app/artifacts/faiss
+
     environment:
-      - FAISS_LOCAL_DIR=/artifacts/faiss  
+      - FAISS_LOCAL_DIR=/app/artifacts/faiss
+
     restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/docs"]
+      interval: 30s
+      timeout: 3s
+      retries: 80
+      start_period: 600s
+
 
 
   rag_api:
     build:
       context: ./rag_api
       dockerfile: Dockerfile
+
     container_name: rag_api
+
     ports:
       - "8000:8000"
+
     env_file:
       - .env
+
     volumes:
-      - ./artifacts/faiss:/artifacts/faiss
+      - ./artifacts/faiss:/app/artifacts/faiss
+
     environment:
-      - FAISS_LOCAL_DIR=/artifacts/faiss
+      - FAISS_LOCAL_DIR=/app/artifacts/faiss
+
     depends_on:
-      - batch_indexer
+      batch_indexer:
+        condition: service_healthy
+
     restart: unless-stopped

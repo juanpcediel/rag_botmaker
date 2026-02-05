@@ -1,0 +1,10 @@
+{
+  "chunks": 6534,
+  "embedding_dim": 384,
+  "dataset": "datos_endpoint.parquet",
+  "s3_bucket": "nalsani-data-science-pruebas",
+  "s3_prefix": "DianaAC/ChatBotRAG/data_endpoint",
+  "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "metric": "inner_product",
+  "index_type": "HNSWFlat"
+}

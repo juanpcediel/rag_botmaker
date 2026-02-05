@@ -1,7 +1,13 @@
 fastapi
 uvicorn[standard]
+requests
 
 numpy<2.0
+
+boto3
+botocore
+
+faiss-cpu
 
 torch==2.1.2+cpu
 torchvision==0.16.2+cpu
@@ -13,5 +19,5 @@ accelerate==0.25.0
 sentence-transformers==2.2.2
 huggingface_hub<0.20
 
-pandas
-
+pandas>=2.0,<3.0
+pyarrow>=14,<18
