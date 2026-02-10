@@ -4,10 +4,10 @@ import logging
 import gradio as gr
 import os
 
-from app.vectorstore import load_vectorstore
-from app.rag import generate_answer
-from app.llm_bedrock import call_llm
-from app.memory_store import get_session_memory
+from rag_api.app.vectorstore.faiss import load_vectorstore
+from rag_api.app.rag.pipeline import generate_answer
+from rag_api.app.llm.bedrock import call_llm
+from rag_api.app.memory.store import get_session_memory
 
 
 # Log for debuging

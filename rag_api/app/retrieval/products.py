@@ -1,5 +1,5 @@
 from collections import defaultdict
-from app.embeddings_client import embed_texts
+from rag_api.app.embeddings.client import embed_texts
 
 
 def retrieve_products(store, query, top_k_products=5, overfetch=30):

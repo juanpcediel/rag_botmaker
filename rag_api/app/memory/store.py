@@ -1,4 +1,4 @@
-from app.chat_memory import ChatMemory
+from rag_api.app.memory.chat_memory import ChatMemory
 
 _sessions = {}
 

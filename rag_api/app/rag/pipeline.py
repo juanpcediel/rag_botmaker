@@ -1,10 +1,10 @@
 from collections import defaultdict
 
-from app.embeddings_client import embed_texts
+from rag_api.app.embeddings.client import embed_texts
 from app.retrieval import retrieve_products
 
 from app.config import settings
-from app.prompt import PROMPT_TEMPLATE
+from rag_api.app.rag.prompt import PROMPT_TEMPLATE
 
 def format_chat_history(turns):
     return "\n".join(

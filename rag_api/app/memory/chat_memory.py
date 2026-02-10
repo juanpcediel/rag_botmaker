@@ -1,6 +1,6 @@
 import faiss
 import time
-from app.embeddings_client import embed_texts
+from rag_api.app.embeddings.client import embed_texts
 
 
 class ChatMemory:
