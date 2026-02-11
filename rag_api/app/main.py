@@ -8,6 +8,7 @@ from app.vectorstore.faiss import load_vectorstore
 from app.rag.pipeline import generate_answer
 from app.llm.bedrock import call_llm
 from app.memory.chat_memory import ChatMemory
+from app.cache.semantic_response import create_index
 
 # Log for debuging
 logging.basicConfig(
@@ -19,6 +20,9 @@ logger = logging.getLogger('rag-api')
 # Core app RAG
 store = load_vectorstore()
 app = FastAPI()
+
+# Create index semantic response
+create_index()
 
 # Models 
 class ChatRequest(BaseModel):

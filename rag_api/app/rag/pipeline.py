@@ -2,7 +2,8 @@ import logging
 import time
 
 from app.retrieval.products import retrieve_products
-from app.cache.response import get_cached_response, set_cached_response
+# from app.cache.response import get_cached_response, set_cached_response
+from app.cache.semantic_response import (search_semantic_response, save_semantic_response)
 from app.rag.prompt import PROMPT_TEMPLATE
 
 # logger initiation
@@ -22,10 +23,11 @@ def generate_answer(store, question, memory, llm_call):
     session = getattr(memory, 'session_id', 'unknown')
 
     # Response cache first
-    cached = get_cached_response(question)
-
+    # cached = get_cached_response(question)
+    cached = search_semantic_response(question)
+    
     if cached:
-        logger.info(f"[SESSION={session}] ✅ CACHE_HIT")
+        logger.info(f"[SESSION={session}] ✅ SEMANTIC_CACHE_HIT")
         t0 = time.perf_counter()
         # Retrieval
         context, products = retrieve_products(store, question)
@@ -36,12 +38,13 @@ def generate_answer(store, question, memory, llm_call):
 
         memory.add_turn("user", question)
         memory.add_turn("assistant", cached)
-        # Empty array because we don't need retrieval in this path
+        
+
         return cached, products
     
-    logger.info(f"[SESSION={session}] ❌ CACHE_MISS → calling LLM")
+    logger.info(f"[SESSION={session}] ❌ SEMANTIC_CACHE_HIT -> calling LLM")
 
-    # Retrieval, only if cache does'nt exists
+    # Retrieval, only if cache doesn't exists
     t0 = time.perf_counter()
     context, products = retrieve_products(store, question)
     retrieval_dt = (time.perf_counter() - t0) * 1000
@@ -80,8 +83,10 @@ def generate_answer(store, question, memory, llm_call):
     llm_dt = (time.perf_counter() - t0) * 1000
 
     logger.info(f"[SESSION={session}] 🤖 LLM_CALL time={llm_dt:.1f}ms")
+
     # Modify cache: save cache + memory
-    set_cached_response(question, answer)
+    # set_cached_response(question, answer)
+    save_semantic_response(question, answer)
 
 
     memory.add_turn("user", question)
