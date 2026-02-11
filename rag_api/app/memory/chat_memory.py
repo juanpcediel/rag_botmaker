@@ -1,6 +1,68 @@
 import faiss
 import time
-from rag_api.app.embeddings.client import embed_texts
+
+from app.embeddings.client import embed_texts
+from app.memory.store import get_history, save_history
+
+class ChatMemory:
+    # Constructor
+    def __init__(self, session_id:str):
+        self.session_id = session_id
+        # Load Redis history
+        self.turns = get_history(session_id)
+        self.index = None
+
+        # rebuild index if history exists
+        if self.turns:
+            self._build_index()
+    
+    # Build FAISS index
+    def _build_index(self):
+        texts = [text for _, text in self.turns]
+        vecs = embed_texts(texts)
+        dim = vecs.shaped[1]
+
+        self.index = faiss.IndexHNSWFlat(
+            dim,
+            16,
+            faiss.METRIC_INNER_PRODUCT
+        )
+        # FAISS class SearchParametersHNSW 
+        self.index.hnsw.efSearch = 64
+        self.index.add(vecs)
+
+    # Add turns
+    def add_turn(self, role:str, text:str):
+        self.turns.append((role,text))
+
+        #Persist in Redis
+        save_history(self.session_id, self.turns)
+
+        #Update local index
+        vec = embed_texts([text])
+
+        if self.index is None:
+            self._build_index()
+        else:
+            self.index.add(vec)
+
+    # Last Messages
+    def last_n(self, n:int = 6):
+        return self.turns[-n:]
+    
+    # Semantic retrieval
+    def retrieve_relevat(self, query:str, k: int = 4):
+        if self.index is None:
+            return []
+        
+        qv = embed_texts([query])
+
+        _, idxs = self.index.search(qv, min(k,len(self.turn)))
+
+        return [self.turns[i] for i in idxs[0] if i>=0]
+        
+
+        
 
 
 class ChatMemory:

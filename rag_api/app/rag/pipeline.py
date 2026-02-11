@@ -1,25 +1,60 @@
-from collections import defaultdict
+import logging
+import time
 
-from rag_api.app.embeddings.client import embed_texts
-from app.retrieval import retrieve_products
+from app.retrieval.products import retrieve_products
+from app.cache.response import get_cached_response, set_cached_response
+from app.rag.prompt import PROMPT_TEMPLATE
 
-from app.config import settings
-from rag_api.app.rag.prompt import PROMPT_TEMPLATE
+# logger initiation
+logger = logging.getLogger("rag.pipeline")
 
+# Format helper
 def format_chat_history(turns):
     return "\n".join(
         f"{role}: {text}" for role, text in turns
     )
 
 
+# Main pipeline
 def generate_answer(store, question, memory, llm_call):
-    context, products = retrieve_products(store, question)
 
+    # extract the value from the 'session' object
+    session = getattr(memory, 'session_id', 'unknown')
+
+    # Response cache first
+    cached = get_cached_response(question)
+
+    if cached:
+        logger.info(f"[SESSION={session}] ✅ CACHE_HIT")
+        t0 = time.perf_counter()
+        # Retrieval
+        context, products = retrieve_products(store, question)
+        
+        dt = (time.perf_counter() - t0) * 1000
+
+        logger.debug(f"[SESSION={session}] retrieval_time={dt:.1f}ms")
+
+        memory.add_turn("user", question)
+        memory.add_turn("assistant", cached)
+        # Empty array because we don't need retrieval in this path
+        return cached, products
+    
+    logger.info(f"[SESSION={session}] ❌ CACHE_MISS → calling LLM")
+
+    # Retrieval, only if cache does'nt exists
+    t0 = time.perf_counter()
+    context, products = retrieve_products(store, question)
+    retrieval_dt = (time.perf_counter() - t0) * 1000
+
+    logger.debug(f"[SESSION={session}] retrieval_time={retrieval_dt:.1f}ms")
+
+    # Memory context
     recent = memory.last_n(6)
     relevant = memory.retrieve_relevant(question, k=3)
 
     seen = set()
     merged = []
+
     for t in relevant + recent:
         if t not in seen:
             seen.add(t)
@@ -27,13 +62,27 @@ def generate_answer(store, question, memory, llm_call):
 
     chat_history = format_chat_history(merged)
 
+    # Prompt
     prompt = PROMPT_TEMPLATE.format(
         context=context,
         chat_history=chat_history,
         question=question
     )
-
+    
+    # # Search in cache
+    # cached = get_cached_response(question)
+    # if cached:
+    #     return cached, products
+    
+    # LLM call
+    t0 = time.perf_counter()
     answer = llm_call(prompt)
+    llm_dt = (time.perf_counter() - t0) * 1000
+
+    logger.info(f"[SESSION={session}] 🤖 LLM_CALL time={llm_dt:.1f}ms")
+    # Modify cache: save cache + memory
+    set_cached_response(question, answer)
+
 
     memory.add_turn("user", question)
     memory.add_turn("assistant", answer)

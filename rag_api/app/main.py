@@ -4,11 +4,10 @@ import logging
 import gradio as gr
 import os
 
-from rag_api.app.vectorstore.faiss import load_vectorstore
-from rag_api.app.rag.pipeline import generate_answer
-from rag_api.app.llm.bedrock import call_llm
-from rag_api.app.memory.store import get_session_memory
-
+from app.vectorstore.faiss import load_vectorstore
+from app.rag.pipeline import generate_answer
+from app.llm.bedrock import call_llm
+from app.memory.chat_memory import ChatMemory
 
 # Log for debuging
 logging.basicConfig(
@@ -32,7 +31,10 @@ def chat(req: ChatRequest):
     
     logger.info(f'Chat Request | Session = {req.session_id}')
 
-    memory = get_session_memory(req.session_id)
+    # ChatMemory
+    # memory = get_session_memory(req.session_id)
+    memory = ChatMemory(req.session_id)
+
     answer, products = generate_answer(
         store, 
         req.message, 
