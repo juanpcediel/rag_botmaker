@@ -44,6 +44,7 @@ def generate_answer(store, question, memory, llm_call):
     
     logger.info(f"[SESSION={session}] ❌ SEMANTIC_CACHE_HIT -> calling LLM")
 
+
     # Retrieval, only if cache doesn't exists
     t0 = time.perf_counter()
     context, products = retrieve_products(store, question)

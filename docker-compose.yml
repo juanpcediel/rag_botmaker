@@ -1,4 +1,17 @@
 services:
+  redis:
+      image: redis/redis-stack:latest
+      container_name: redis
+      ports:
+        - "6379:6379"
+        - "8002:8001"
+      restart: unless-stopped
+      healthcheck:
+        test: ['CMD', 'redis-cli', 'ping']
+        interval: 30s
+        timeout: 10s
+        retries: 10
+
 
   batch_indexer:
     build:
@@ -48,8 +61,11 @@ services:
 
     environment:
       - FAISS_LOCAL_DIR=/app/artifacts/faiss
+      - REDIS_URL=//redis:6379
 
     depends_on:
+      redis:
+        condition: service_healthy
       batch_indexer:
         condition: service_healthy
 
