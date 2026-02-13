@@ -5,7 +5,7 @@ def clean(x):
 def build_chunks(row: dict) -> list[dict]:
 
     sku = clean(row.get("sku"))
-    product_id = sku            
+    product_id = sku
 
     title = clean(row.get("Nombre_producto"))
     description = clean(row.get("Descripcion_producto"))
@@ -20,12 +20,12 @@ def build_chunks(row: dict) -> list[dict]:
     link = clean(row.get("Link"))
 
     price = row.get("Precio")
-    stock = row.get("Inventario")
+    # stock = row.get("Inventario") #separate semantic data from dynamic data
 
     chunks = []
 
     # Chunk semántico natural
-    
+
     semantic_text = " ".join(filter(None, [
         title,
         f"marca {brand}" if brand else "",
@@ -39,18 +39,17 @@ def build_chunks(row: dict) -> list[dict]:
 
     chunks.append({
         "product_id": product_id,
-        "sku": sku,               
+        "sku": sku,
         "title": title,
         "text": semantic_text,
         "image": image,
         "link": link,
-        "price": price,
-        "stock": stock
+        "price": price
     })
 
-    
+
     # Chunk corto keywords
-    
+
     short_text = " ".join(filter(None, [
         title, brand, category, color, size, keywords
     ]))
@@ -61,9 +60,7 @@ def build_chunks(row: dict) -> list[dict]:
         "title": title,
         "text": short_text,
         "image": image,
-        "link": link,
-        "price": price,
-        "stock": stock
+        "link": link
     })
 
     return chunks

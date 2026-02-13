@@ -1,16 +1,19 @@
 services:
   redis:
-      image: redis/redis-stack:latest
-      container_name: redis
-      ports:
-        - "6379:6379"
-        - "8002:8001"
-      restart: unless-stopped
-      healthcheck:
-        test: ['CMD', 'redis-cli', 'ping']
-        interval: 30s
-        timeout: 10s
-        retries: 10
+    image: redis/redis-stack:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+      - "8002:8001"   # RedisInsight (opcional)
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
 
   batch_indexer:
@@ -40,9 +43,6 @@ services:
       timeout: 3s
       retries: 80
       start_period: 600s
-
-
-
   rag_api:
     build:
       context: ./rag_api
@@ -61,7 +61,7 @@ services:
 
     environment:
       - FAISS_LOCAL_DIR=/app/artifacts/faiss
-      - REDIS_URL=//redis:6379
+      - REDIS_URL=redis://redis:6379
 
     depends_on:
       redis:
@@ -70,3 +70,6 @@ services:
         condition: service_healthy
 
     restart: unless-stopped
+
+volumes:
+ redis_data:

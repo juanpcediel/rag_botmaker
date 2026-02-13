@@ -50,7 +50,7 @@ def build_index():
     print(f'Reading dataset from {DATA_PATH}')
     df_raw =  pd.read_parquet(DATA_PATH)
 
-    # Data processing HERE... soon
+    # Data processing, data endpoint
     
     df = parquet_data_processing(df_raw)
 

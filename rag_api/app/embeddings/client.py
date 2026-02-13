@@ -39,7 +39,7 @@ def embed_texts(texts: list[str]) ->np.ndarray:
             results.append(cached)
         else:
             results.append(None)
-            missing_texts.apend(text)
+            missing_texts.append(text)
             missing_positions.append(i)
     
     # Order only the missing items

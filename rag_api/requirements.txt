@@ -8,4 +8,5 @@ faiss-cpu
 requests
 numpy
 pandas
+redis
 

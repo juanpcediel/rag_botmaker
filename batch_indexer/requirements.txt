@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 requests
+redis
 
 numpy<2.0
 

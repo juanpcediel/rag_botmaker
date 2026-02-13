@@ -3,11 +3,17 @@ from datetime import datetime
 from fastapi import FastAPI
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
+
 from batch.build_index import build_index
+from batch.update_stock import update_stock
 
 app = FastAPI()
 
+# Faiss index rebuild
 REINDEX_INTERVAL = 12 * 60 * 60
+
+# Stock update 
+STOCK_REFRESH_INTERVAL = 60
 
 reindex_lock = asyncio.Lock()
 model = None  # lazy load
@@ -48,27 +54,41 @@ async def run_reindex():
 
         print(f"*** Reindex finished at {datetime.now()} ***")
 
+# -------------------------
+# Scheduler 12h rebuild faiss index
+# -------------------------
+async def periodic_reindex():
+    while True:
+        await asyncio.sleep(REINDEX_INTERVAL)
+        await run_reindex()
+
+# -------------------------
+# Scheduler 1 min update stock
+# -------------------------
+async def periodic_stock_refresh():
+    while True:
+        await asyncio.sleep(STOCK_REFRESH_INTERVAL)
+        print('*** Updating Stock... ***')
+        
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, update_stock)
+        print('*** Stock updated ***')
 
 # -------------------------
 # Startup behavior
 # -------------------------
 @app.on_event("startup")
 async def startup_tasks():
-    # primera construcción BLOQUEANTE
+    # Build index once (blocking)
     await run_reindex()
 
-    # luego scheduler en background
+    # Update stock once (blocking)
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, update_stock)
+
+    # Start background schedulers
     asyncio.create_task(periodic_reindex())
-
-
-
-# -------------------------
-# Scheduler 12h
-# -------------------------
-async def periodic_reindex():
-    while True:
-        await asyncio.sleep(REINDEX_INTERVAL)
-        await run_reindex()
+    asyncio.create_task(periodic_stock_refresh())
 
 
 # -------------------------

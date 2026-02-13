@@ -1,5 +1,6 @@
 from collections import defaultdict
 from app.embeddings.client import embed_texts
+from app.redis.client import redis_client
 
 
 def retrieve_products(store, query, top_k_products=5, overfetch=30):
@@ -10,6 +11,7 @@ def retrieve_products(store, query, top_k_products=5, overfetch=30):
     grouped = defaultdict(list)
     order = []
 
+    # Group by product_id
     for i in idxs[0]:
         if i < 0:
             continue
@@ -25,22 +27,36 @@ def retrieve_products(store, query, top_k_products=5, overfetch=30):
     context_blocks = []
     products = []
 
-    for pid in order[:top_k_products]:
+
+    # Filter by dynamic store in Redis
+    for pid in order:
         items = grouped[pid]
-
-        merged_text = "\n\n".join(x["text"] for x in items)
         best = items[0]
+        sku = best['sku']
+        
+        # Check dynamic stock
+        stock = redis_client.get(f'stock:{sku}')
 
+        # If it doesn't exist or is 0 -> skip
+        if not stock or int(stock) <= 0:
+            continue
+
+        merged_text = '\n\n'.join(x['text'] for x in items)
+                            
         products.append({
-            "sku": best["sku"],
+            "sku": sku,
             "title": best["title"],
             "image": best["image"],
             "link": best["link"],
             "price": best.get("price"),
-            "stock": best.get("stock"),
+            "stock": int(stock)
         })
 
         context_blocks.append(merged_text)
+
+        # Limit final quantity
+        if len(products) >= top_k_products:
+            break
 
     context = "\n\n---\n\n".join(context_blocks)
 
