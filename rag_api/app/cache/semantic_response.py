@@ -53,7 +53,7 @@ def create_index():
 # Save the QA pairs
 def save_semantic_response(question:str, answer:str):
     vec = embed_texts([question])[0]
-    key = f'qa: {hash(question)}'
+    key = f'qa:{stable_hash(question)}'
 
     redis_client.hset(key,
                       mapping={
