@@ -1,5 +1,5 @@
 {
-  "chunks": 5282,
+  "chunks": 5156,
   "embedding_dim": 384,
   "dataset": "datos_endpoint.parquet",
   "s3_bucket": "nalsani-data-science-pruebas",

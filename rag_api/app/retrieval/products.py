@@ -34,7 +34,7 @@ def retrieve_products(store, query, top_k_products=5, overfetch=30):
         best = items[0]
         sku = best['sku']
         
-        # Check dynamic stock
+        # Check dynamic stock redis.get
         stock = redis_client.get(f'stock:{sku}')
 
         # If it doesn't exist or is 0 -> skip

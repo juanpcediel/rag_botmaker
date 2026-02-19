@@ -11,7 +11,7 @@ S3_BUCKET = os.getenv("S3_BUCKET")
 S3_PREFIX = os.getenv("S3_PREFIX", "")
 
 DATA_FILENAME = os.getenv('DATA_FILENAME', 'datos_endpoint.parquet')
-FAISS_LOCAL_DIR = Path(os.getenv('FAISS_LOCAL_DIR', './artifcsts/faiss'))
+FAISS_LOCAL_DIR = Path(os.getenv('FAISS_LOCAL_DIR', './artifacts/faiss'))
 DATA_PATH = FAISS_LOCAL_DIR / DATA_FILENAME
 
 def update_stock():

@@ -27,7 +27,8 @@ def embed_texts(texts):
 
     for i in range(0, total, batch_size):
         batch = texts[i:i+batch_size]
-
+        # important normalize embeddings
+        # after normalize embeddings inner producto = cosine similarity 
         vec = model.encode(
             batch,
             convert_to_numpy=True,

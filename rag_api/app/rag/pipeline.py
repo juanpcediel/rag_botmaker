@@ -27,7 +27,7 @@ def generate_answer(store, question, memory, llm_call):
     cached = search_semantic_response(question)
     
     if cached:
-        logger.info(f"[SESSION={session}] ✅ SEMANTIC_CACHE_HIT")
+        logger.info(f"[SESSION={session}] YES SEMANTIC_CACHE_HIT")
         t0 = time.perf_counter()
         # Retrieval
         context, products = retrieve_products(store, question)
@@ -42,7 +42,7 @@ def generate_answer(store, question, memory, llm_call):
 
         return cached, products
     
-    logger.info(f"[SESSION={session}] ❌ SEMANTIC_CACHE_HIT -> calling LLM")
+    logger.info(f"[SESSION={session}] NOT SEMANTIC_CACHE_HIT -> calling LLM")
 
 
     # Retrieval, only if cache doesn't exists
